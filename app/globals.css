@@ -1,0 +1,85 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-primary-purple: #8b5cf6;
+  --color-primary-blue: #06b6d4;
+  --color-dark-bg: #030303;
+  --color-card-bg: rgba(18, 18, 23, 0.7);
+  --color-glass-border: rgba(255, 255, 255, 0.1);
+  --color-glass-highlight: rgba(139, 92, 246, 0.3);
+}
+
+:root {
+  --background: #030303;
+  --foreground: #f8fafc;
+  --card: #121217;
+  --card-foreground: #f8fafc;
+  --popover: #030303;
+  --popover-foreground: #f8fafc;
+  --primary: #8b5cf6;
+  --primary-foreground: #ffffff;
+  --secondary: #1e293b;
+  --secondary-foreground: #f8fafc;
+  --muted: #1e293b;
+  --muted-foreground: #94a3b8;
+  --accent: #06b6d4;
+  --accent-foreground: #ffffff;
+  --destructive: #ef4444;
+  --destructive-foreground: #f8fafc;
+  --border: rgba(255, 255, 255, 0.1);
+  --input: rgba(255, 255, 255, 0.1);
+  --ring: #8b5cf6;
+  --radius: 0.75rem;
+}
+
+* {
+  border-color: var(--border);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(139, 92, 246, 0.3) transparent;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-feature-settings:
+    "rlig" 1,
+    "calt" 1;
+  background-image:
+    radial-gradient(at 0% 0%, rgba(139, 92, 246, 0.15) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(6, 182, 212, 0.15) 0px, transparent 50%);
+  background-attachment: fixed;
+  min-height: 100vh;
+}
+
+.glass {
+  background: rgba(18, 18, 23, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.glass-pill {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 9999px;
+}
+
+.animate-glow {
+  animation: glow 4s ease-in-out infinite alternate;
+}
+
+@keyframes glow {
+  from {
+    box-shadow: 0 0 10px -5px rgba(139, 92, 246, 0.3);
+  }
+  to {
+    box-shadow: 0 0 20px 2px rgba(139, 92, 246, 0.5);
+  }
+}
+
+::selection {
+  background-color: rgba(139, 92, 246, 0.3);
+  color: #fff;
+}
