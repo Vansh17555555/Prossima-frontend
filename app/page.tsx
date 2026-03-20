@@ -57,8 +57,12 @@ export default function Home() {
   };
 
   useEffect(() => {
-    setOffset(0);
-    fetchTenders(searchTerm, 0, false, statusFilter, workAreaFilter);
+    const delayDebounceFn = setTimeout(() => {
+      setOffset(0);
+      fetchTenders(searchTerm, 0, false, statusFilter, workAreaFilter);
+    }, 300);
+
+    return () => clearTimeout(delayDebounceFn);
   }, [searchTerm, statusFilter, workAreaFilter]);
 
   const handleSearch = (term: string) => {
