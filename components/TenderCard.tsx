@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { MapPin, Calendar, Tag, ChevronRight, Activity } from "lucide-react";
+import { MapPin, Calendar, Tag, ChevronRight, Activity, FileText } from "lucide-react";
 
 interface Tender {
   tender_no: string;
@@ -57,11 +57,17 @@ export default function TenderCard({ tender }: { tender: Tender }) {
         </div>
       </div>
 
-      <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity translate-x-2 group-hover:translate-x-0">
-        <div className="p-1.5 rounded-full bg-primary-purple shadow-lg shadow-primary-purple/20">
-          <ChevronRight className="w-4 h-4 text-white" />
+      <a 
+        href={tender.pdf_link || '#'} 
+        target="_blank" 
+        rel="noopener noreferrer"
+        className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity translate-x-2 group-hover:translate-x-0"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="p-2 rounded-full bg-primary-purple shadow-lg shadow-primary-purple/20 hover:bg-primary-blue transition-colors">
+          <FileText className="w-4 h-4 text-white" />
         </div>
-      </div>
+      </a>
     </motion.div>
   );
 }
