@@ -187,7 +187,6 @@ export default function Home() {
           total={totalCount} 
           active={Math.floor(totalCount * 0.4)} 
           expiring={Math.floor(totalCount * 0.05)} 
-          growth="+12.5%" 
         />
 
         <section>
