@@ -26,6 +26,7 @@ export default function Home() {
   const [searchTerm, setSearchTerm] = useState("");
   const [totalCount, setTotalCount] = useState(0);
   const [offset, setOffset] = useState(0);
+  const [activeTab, setActiveTab] = useState("dashboard");
   const LIMIT = 12;
 
   const fetchTenders = async (query = "", currentOffset = 0, append = false) => {
@@ -66,121 +67,144 @@ export default function Home() {
 
   return (
     <main className="min-h-screen pb-20">
-      <Navbar onSearch={handleSearch} />
+      <Navbar onSearch={handleSearch} activeTab={activeTab} onTabChange={setActiveTab} />
 
       <div className="max-w-7xl mx-auto px-6 pt-12">
-        <header className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
-          <div>
-            <motion.div 
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary-purple/10 border border-primary-purple/20 text-primary-purple text-xs font-bold tracking-wider mb-4"
-            >
-              <RefreshCcw className="w-3 h-3" />
-              LIVE UPDATES ACTIVE
-            </motion.div>
-            <h1 className="text-4xl font-extrabold tracking-tight mb-2">
-              Tender Analytics <span className="text-primary-purple">&</span> Control
-            </h1>
-            <p className="text-muted-foreground text-lg max-w-2xl">
-              Real-time monitoring and analytics for IREPS railway tenders.
-            </p>
-          </div>
+        {activeTab === 'dashboard' || activeTab === 'tenders' ? (
+          <>
+            <header className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
+              <div>
+                <motion.div 
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary-purple/10 border border-primary-purple/20 text-primary-purple text-xs font-bold tracking-wider mb-4"
+                >
+                  <RefreshCcw className="w-3 h-3" />
+                  LIVE UPDATES ACTIVE
+                </motion.div>
+                <h1 className="text-4xl font-extrabold tracking-tight mb-2">
+                  {activeTab === 'dashboard' ? 'Tender Analytics' : 'Tender Directory'} <span className="text-primary-purple">&</span> Control
+                </h1>
+                <p className="text-muted-foreground text-lg max-w-2xl">
+                  {activeTab === 'dashboard' 
+                    ? 'Real-time monitoring and analytics for IREPS railway tenders.'
+                    : 'Search and browse through all available IREPS tenders.'}
+                </p>
+              </div>
 
-          <div className="flex items-center gap-3">
-            <div className="flex bg-white/5 border border-white/10 p-1 rounded-xl">
-              <button 
-                onClick={() => setViewMode("grid")}
-                className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-primary-purple text-white shadow-lg' : 'text-muted-foreground hover:text-white'}`}
-              >
-                <LayoutGrid className="w-4 h-4" />
-              </button>
-              <button 
-                onClick={() => setViewMode("list")}
-                className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-primary-purple text-white shadow-lg' : 'text-muted-foreground hover:text-white'}`}
-              >
-                <ListIcon className="w-4 h-4" />
-              </button>
-            </div>
-            <button className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-xl hover:border-white/20 transition-all font-medium text-sm">
-              <Filter className="w-4 h-4" />
-              Filters
-            </button>
-          </div>
-        </header>
+              <div className="flex items-center gap-3">
+                <div className="flex bg-white/5 border border-white/10 p-1 rounded-xl">
+                  <button 
+                    onClick={() => setViewMode("grid")}
+                    className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-primary-purple text-white shadow-lg' : 'text-muted-foreground hover:text-white'}`}
+                  >
+                    <LayoutGrid className="w-4 h-4" />
+                  </button>
+                  <button 
+                    onClick={() => setViewMode("list")}
+                    className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-primary-purple text-white shadow-lg' : 'text-muted-foreground hover:text-white'}`}
+                  >
+                    <ListIcon className="w-4 h-4" />
+                  </button>
+                </div>
+                <button className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-xl hover:border-white/20 transition-all font-medium text-sm">
+                  <Filter className="w-4 h-4" />
+                  Filters
+                </button>
+              </div>
+            </header>
 
-        <DashboardStats 
-          total={totalCount} 
-          active={Math.floor(totalCount * 0.4)} 
-          expiring={Math.floor(totalCount * 0.05)} 
-          growth="+12.5%" 
-        />
+            <DashboardStats 
+              total={totalCount} 
+              active={Math.floor(totalCount * 0.4)} 
+              expiring={Math.floor(totalCount * 0.05)} 
+              growth="+12.5%" 
+            />
 
-        <section>
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold flex items-center gap-2">
-              Latest Tenders
-              <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-white/5 text-muted-foreground border border-white/10">
-                Found {tenders.length}
-              </span>
-            </h2>
-            <button 
-              onClick={() => fetchTenders(searchTerm)}
-              className="text-xs text-primary-purple hover:underline font-medium"
-            >
-              Refresh Results
-            </button>
-          </div>
+            <section>
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-bold flex items-center gap-2">
+                  {activeTab === 'dashboard' ? 'Latest Tenders' : 'All Tenders'}
+                  <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-white/5 text-muted-foreground border border-white/10">
+                    {searchTerm ? `Found ${totalCount}` : activeTab === 'dashboard' ? 'Recent' : `Total ${totalCount}`}
+                  </span>
+                </h2>
+                <button 
+                  onClick={() => fetchTenders(searchTerm, 0, false)}
+                  className="text-xs text-primary-purple hover:underline font-medium"
+                >
+                  Refresh Results
+                </button>
+              </div>
 
-          <AnimatePresence mode="wait">
-            {loading ? (
-              <motion.div 
-                key="loading"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
-              >
-                {[...Array(8)].map((_, i) => (
-                  <div key={i} className="glass h-48 rounded-2xl animate-pulse bg-white/5"></div>
-                ))}
-              </motion.div>
-            ) : (
-              <motion.div 
-                key="content"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className={viewMode === 'grid' 
-                  ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
-                  : "flex flex-col gap-4"
-                }
-              >
-                {tenders.map((tender) => (
-                  <TenderCard key={`${tender.tender_no}-${tender.department}`} tender={tender} />
-                ))}
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {tenders.length < totalCount && (
-            <div className="mt-12 flex justify-center">
-              <button 
-                onClick={handleLoadMore}
-                disabled={loading}
-                className="px-8 py-3 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 hover:border-white/20 transition-all font-bold text-sm flex items-center gap-2 group disabled:opacity-50"
-              >
+              <AnimatePresence mode="wait">
                 {loading ? (
-                  <RefreshCcw className="w-4 h-4 animate-spin" />
+                  <motion.div 
+                    key="loading"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+                  >
+                    {[...Array(8)].map((_, i) => (
+                      <div key={i} className="glass h-48 rounded-2xl animate-pulse bg-white/5"></div>
+                    ))}
+                  </motion.div>
                 ) : (
-                  <>
-                    Load More Tenders
-                    <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                  </>
+                  <motion.div 
+                    key="content"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className={viewMode === 'grid' 
+                      ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+                      : "flex flex-col gap-4"
+                    }
+                  >
+                    {tenders.map((tender) => (
+                      <TenderCard key={`${tender.tender_no}-${tender.department}`} tender={tender} />
+                    ))}
+                  </motion.div>
                 )}
-              </button>
+              </AnimatePresence>
+
+              {tenders.length < totalCount && (
+                <div className="mt-12 flex justify-center">
+                  <button 
+                    onClick={handleLoadMore}
+                    disabled={loading}
+                    className="px-8 py-3 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 hover:border-white/20 transition-all font-bold text-sm flex items-center gap-2 group disabled:opacity-50"
+                  >
+                    {loading ? (
+                      <RefreshCcw className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <>
+                        Load More Tenders
+                        <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                      </>
+                    )}
+                  </button>
+                </div>
+              )}
+            </section>
+          </>
+        ) : (
+          <div className="flex flex-col items-center justify-center py-32 text-center">
+            <div className="w-20 h-20 rounded-3xl bg-primary-purple/10 flex items-center justify-center mb-6 animate-pulse">
+              <RefreshCcw className="w-10 h-10 text-primary-purple" />
             </div>
-          )}
-        </section>
+            <h2 className="text-3xl font-bold mb-4">{activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} Module</h2>
+            <p className="text-muted-foreground text-lg max-w-md">
+              We are currently processing the heavy data required for this view. 
+              Real-time {activeTab} insights will be available shortly.
+            </p>
+            <button 
+              onClick={() => setActiveTab('dashboard')}
+              className="mt-8 px-6 py-2 bg-primary-purple text-white rounded-xl font-bold shadow-lg shadow-primary-purple/20 hover:bg-primary-purple/90 transition-all"
+            >
+              Back to Dashboard
+            </button>
+          </div>
+        )}
       </div>
     </main>
   );
