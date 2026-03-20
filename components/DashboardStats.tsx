@@ -3,14 +3,21 @@
 import { motion } from "framer-motion";
 import { TrendingUp, FileCheck, Clock, Layers } from "lucide-react";
 
-const stats = [
-  { label: "Total Tenders", value: "1,284", icon: Layers, color: "from-blue-500/20 to-blue-400/20", text: "text-blue-400" },
-  { label: "Active Tenders", value: "482", icon: FileCheck, color: "from-green-500/20 to-green-400/20", text: "text-green-400" },
-  { label: "Expiring Soon", value: "24", icon: Clock, color: "from-orange-500/20 to-orange-400/20", text: "text-orange-400" },
-  { label: "Growth Rate", value: "+12.5%", icon: TrendingUp, iconColor: "text-purple-400", color: "from-purple-500/20 to-purple-400/20", text: "text-purple-400" },
-];
+interface StatsProps {
+  total: number;
+  active: number;
+  expiring: number;
+  growth: string;
+}
 
-export default function DashboardStats() {
+export default function DashboardStats({ total, active, expiring, growth }: StatsProps) {
+  const stats = [
+    { label: "Total Tenders", value: total.toLocaleString(), icon: Layers, color: "from-blue-500/20 to-blue-400/20", text: "text-blue-400" },
+    { label: "Active Tenders", value: active.toLocaleString(), icon: FileCheck, color: "from-green-500/20 to-green-400/20", text: "text-green-400" },
+    { label: "Expiring Soon", value: expiring.toLocaleString(), icon: Clock, color: "from-orange-500/20 to-orange-400/20", text: "text-orange-400" },
+    { label: "Growth Rate", value: growth, icon: TrendingUp, iconColor: "text-purple-400", color: "from-purple-500/20 to-purple-400/20", text: "text-purple-400" },
+  ];
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
       {stats.map((stat, i) => (

@@ -5,10 +5,13 @@ import { MapPin, Calendar, Tag, ChevronRight, Activity } from "lucide-react";
 
 interface Tender {
   tender_no: string;
-  work_name: string;
+  department: string;
+  title: string;
   status: string;
   work_area: string;
-  closing_date: string;
+  due_at: string;
+  due_days: string;
+  pdf_link: string;
 }
 
 export default function TenderCard({ tender }: { tender: Tender }) {
@@ -35,8 +38,11 @@ export default function TenderCard({ tender }: { tender: Tender }) {
             </span>
           </div>
           <h3 className="text-sm font-semibold leading-relaxed line-clamp-2 group-hover:text-white transition-colors">
-            {tender.work_name}
+            {tender.title}
           </h3>
+          <p className="text-[10px] text-muted-foreground mt-1 truncate italic">
+            {tender.department}
+          </p>
         </div>
       </div>
 
@@ -47,7 +53,7 @@ export default function TenderCard({ tender }: { tender: Tender }) {
         </div>
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           <Calendar className="w-3.5 h-3.5" />
-          <span>{new Date(tender.closing_date).toLocaleDateString()}</span>
+          <span>{tender.due_at ? new Date(tender.due_at).toLocaleDateString() : 'N/A'}</span>
         </div>
       </div>
 

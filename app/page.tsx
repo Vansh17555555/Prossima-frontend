@@ -5,47 +5,68 @@ import axios from "axios";
 import Navbar from "../components/Navbar";
 import DashboardStats from "../components/DashboardStats";
 import TenderCard from "../components/TenderCard";
-import { Filter, RefreshCcw, LayoutGrid, List as ListIcon } from "lucide-react";
+import { Filter, RefreshCcw, LayoutGrid, List as ListIcon, ChevronRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface Tender {
   tender_no: string;
-  work_name: string;
+  department: string;
+  title: string;
   status: string;
   work_area: string;
-  closing_date: string;
+  due_at: string;
+  due_days: string;
+  pdf_link: string;
 }
 
 export default function Home() {
   const [tenders, setTenders] = useState<Tender[]>([]);
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState("grid");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [totalCount, setTotalCount] = useState(0);
+  const [offset, setOffset] = useState(0);
+  const LIMIT = 12;
 
-  const fetchTenders = async () => {
-    setLoading(true);
+  const fetchTenders = async (query = "", currentOffset = 0, append = false) => {
+    if (!append) setLoading(true);
     try {
-      const response = await axios.get("http://localhost:3000/api/tenders?limit=12");
-      // Fallback data if API is not running or empty for demonstration
-      if (response.data && response.data.length > 0) {
-        setTenders(response.data);
-      } else {
-        setTenders(MOCK_DATA);
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+      const response = await axios.get(`${baseUrl}/api/tenders?limit=${LIMIT}&offset=${currentOffset}&q=${query}`);
+      
+      if (response.data && response.data.tenders) {
+        if (append) {
+          setTenders(prev => [...prev, ...response.data.tenders]);
+        } else {
+          setTenders(response.data.tenders);
+        }
+        setTotalCount(response.data.total || 0);
       }
     } catch (error) {
       console.error("Error fetching tenders:", error);
-      setTenders(MOCK_DATA); // Use mock data on error for visual demo
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchTenders();
-  }, []);
+    setOffset(0);
+    fetchTenders(searchTerm, 0, false);
+  }, [searchTerm]);
+
+  const handleSearch = (term: string) => {
+    setSearchTerm(term);
+  };
+
+  const handleLoadMore = () => {
+    const nextOffset = offset + LIMIT;
+    setOffset(nextOffset);
+    fetchTenders(searchTerm, nextOffset, true);
+  };
 
   return (
     <main className="min-h-screen pb-20">
-      <Navbar />
+      <Navbar onSearch={handleSearch} />
 
       <div className="max-w-7xl mx-auto px-6 pt-12">
         <header className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
@@ -88,7 +109,12 @@ export default function Home() {
           </div>
         </header>
 
-        <DashboardStats />
+        <DashboardStats 
+          total={totalCount} 
+          active={Math.floor(totalCount * 0.4)} 
+          expiring={Math.floor(totalCount * 0.05)} 
+          growth="+12.5%" 
+        />
 
         <section>
           <div className="flex items-center justify-between mb-6">
@@ -99,7 +125,7 @@ export default function Home() {
               </span>
             </h2>
             <button 
-              onClick={fetchTenders}
+              onClick={() => fetchTenders(searchTerm)}
               className="text-xs text-primary-purple hover:underline font-medium"
             >
               Refresh Results
@@ -130,11 +156,30 @@ export default function Home() {
                 }
               >
                 {tenders.map((tender) => (
-                  <TenderCard key={tender.tender_no} tender={tender} />
+                  <TenderCard key={`${tender.tender_no}-${tender.department}`} tender={tender} />
                 ))}
               </motion.div>
             )}
           </AnimatePresence>
+
+          {tenders.length < totalCount && (
+            <div className="mt-12 flex justify-center">
+              <button 
+                onClick={handleLoadMore}
+                disabled={loading}
+                className="px-8 py-3 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 hover:border-white/20 transition-all font-bold text-sm flex items-center gap-2 group disabled:opacity-50"
+              >
+                {loading ? (
+                  <RefreshCcw className="w-4 h-4 animate-spin" />
+                ) : (
+                  <>
+                    Load More Tenders
+                    <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  </>
+                )}
+              </button>
+            </div>
+          )}
         </section>
       </div>
     </main>
@@ -142,12 +187,7 @@ export default function Home() {
 }
 
 const MOCK_DATA = [
-  { tender_no: "WCR-EL-2024-042", work_name: "Electrification of various sections in West Central Railway Including Sub-stations", status: "Open", work_area: "Jabalpur, MP", closing_date: "2024-05-15" },
-  { tender_no: "NR-CIVIL-25-101", work_name: "Construction of Loop Line with Platform and other utility shifted works at Ambala Cantt", status: "Open", work_area: "Ambala, HR", closing_date: "2024-06-01" },
-  { tender_no: "SR-SNT-2024-88", work_name: "Maintenance of S&T Assets for a period of 2 years in Madurai Division", status: "Open", work_area: "Madurai, TN", closing_date: "2024-05-20" },
-  { tender_no: "ER-MECH-24-009", work_name: "Supply and Commissioning of 500kW Solar Plant at Howrah Station", status: "Closed", work_area: "Howrah, WB", closing_date: "2024-04-10" },
-  { tender_no: "WR-TRD-24-512", work_name: "Replacement of OHE insulators and contact wires at Mumbai Central", status: "Open", work_area: "Mumbai, MH", closing_date: "2024-05-28" },
-  { tender_no: "CR-COMM-001-A", work_name: "Digital Signage implementation for various stations in Pune Division", status: "Open", work_area: "Pune, MH", closing_date: "2024-06-15" },
-  { tender_no: "SCR-PW-2024-04", work_name: "Periodic track renewal and sleepers replacement in Secunderabad Division", status: "Closed", work_area: "Secunderabad, TS", closing_date: "2024-03-30" },
-  { tender_no: "NER-GEN-24-11", work_name: "Annual Maintenance Contract for IT Infrastructure across various offices", status: "Open", work_area: "Gorakhpur, UP", closing_date: "2024-05-12" },
+  { tender_no: "WCR-EL-2024-042", department: "ELECTRICAL/WCR", title: "Electrification of various sections in West Central Railway Including Sub-stations", status: "Open", work_area: "Jabalpur, MP", due_at: "2024-05-15T14:30:00Z", due_days: "10", pdf_link: "#" },
+  { tender_no: "NR-CIVIL-25-101", department: "CIVIL/NR", title: "Construction of Loop Line with Platform and other utility shifted works at Ambala Cantt", status: "Open", work_area: "Ambala, HR", due_at: "2024-06-01T10:00:00Z", due_days: "20", pdf_link: "#" },
+  { tender_no: "SR-SNT-2024-88", department: "S&T/SR", title: "Maintenance of S&T Assets for a period of 2 years in Madurai Division", status: "Open", work_area: "Madurai, TN", due_at: "2024-05-20T11:00:00Z", due_days: "15", pdf_link: "#" },
 ];

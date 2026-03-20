@@ -3,7 +3,11 @@
 import { motion } from "framer-motion";
 import { Search, Bell, User, LayoutDashboard, FileText, Settings, HelpCircle } from "lucide-react";
 
-export default function Navbar() {
+interface NavbarProps {
+  onSearch: (term: string) => void;
+}
+
+export default function Navbar({ onSearch }: NavbarProps) {
   return (
     <nav className="sticky top-0 z-50 w-full border-b border-white/10 glass px-6 py-3 flex items-center justify-between">
       <div className="flex items-center gap-8">
@@ -31,6 +35,7 @@ export default function Navbar() {
             type="text" 
             placeholder="Search tenders..." 
             className="bg-transparent border-none outline-none text-sm w-48 placeholder:text-muted-foreground/60"
+            onChange={(e) => onSearch(e.target.value)}
           />
         </div>
 
