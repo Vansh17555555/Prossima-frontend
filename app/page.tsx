@@ -137,28 +137,28 @@ export default function Home() {
                   <select 
                     value={statusFilter}
                     onChange={(e) => setStatusFilter(e.target.value)}
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-primary-purple/50 transition-all"
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-primary-purple/50 transition-all appearance-none cursor-pointer hover:bg-white/10"
                   >
-                    <option value="">All Statuses</option>
-                    <option value="Published">Published</option>
-                    <option value="Closing Soon">Closing Soon</option>
-                    <option value="Open">Open</option>
-                    <option value="Closed">Closed</option>
+                    <option value="" className="bg-[#0f0f12]">All Statuses</option>
+                    <option value="Published" className="bg-[#0f0f12]">Published</option>
+                    <option value="Closing Soon" className="bg-[#0f0f12]">Closing Soon</option>
+                    <option value="Open" className="bg-[#0f0f12]">Open</option>
+                    <option value="Closed" className="bg-[#0f0f12]">Closed</option>
                   </select>
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-2 relative">
                   <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Work Area</label>
                   <select 
                     value={workAreaFilter}
                     onChange={(e) => setWorkAreaFilter(e.target.value)}
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-primary-purple/50 transition-all"
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-primary-purple/50 transition-all appearance-none cursor-pointer hover:bg-white/10"
                   >
-                    <option value="">All Areas</option>
-                    <option value="Goods & Service">Goods & Service</option>
-                    <option value="Works">Works</option>
-                    <option value="Procurement">Procurement</option>
-                    <option value="Engineering">Engineering</option>
+                    <option value="" className="bg-[#0f0f12]">All Areas</option>
+                    <option value="Works" className="bg-[#0f0f12]">Works</option>
+                    <option value="Goods" className="bg-[#0f0f12]">Goods</option>
+                    <option value="Services" className="bg-[#0f0f12]">Services</option>
+                    <option value="E-Auction" className="bg-[#0f0f12]">E-Auction</option>
                   </select>
                 </div>
 
@@ -169,7 +169,7 @@ export default function Home() {
                       setWorkAreaFilter("");
                       setSearchTerm("");
                     }}
-                    className="w-full px-4 py-2.5 rounded-xl border border-white/10 hover:bg-white/5 transition-all text-sm font-medium"
+                    className="w-full px-4 py-2.5 rounded-xl border border-white/10 hover:bg-red-500/10 hover:border-red-500/50 hover:text-red-400 transition-all text-sm font-medium"
                   >
                     Reset All Filters
                   </button>
