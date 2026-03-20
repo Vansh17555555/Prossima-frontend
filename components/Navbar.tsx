@@ -5,18 +5,9 @@ import { Search, Bell, User, LayoutDashboard, FileText, Settings, HelpCircle } f
 
 interface NavbarProps {
   onSearch: (term: string) => void;
-  activeTab: string;
-  onTabChange: (tab: string) => void;
 }
 
-export default function Navbar({ onSearch, activeTab, onTabChange }: NavbarProps) {
-  const navItems = [
-    { id: 'dashboard', label: 'Dashboard' },
-    { id: 'tenders', label: 'Tenders' },
-    { id: 'analytics', label: 'Analytics' },
-    { id: 'reports', label: 'Reports' },
-  ];
-
+export default function Navbar({ onSearch }: NavbarProps) {
   return (
     <nav className="sticky top-0 z-50 w-full border-b border-white/10 glass px-6 py-3 flex items-center justify-between">
       <div className="flex items-center gap-8">
@@ -27,26 +18,6 @@ export default function Navbar({ onSearch, activeTab, onTabChange }: NavbarProps
           <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">
             PROSSIMA
           </span>
-        </div>
-
-        <div className="hidden md:flex items-center gap-6 text-sm font-medium text-muted-foreground">
-          {navItems.map((item) => (
-            <button
-              key={item.id}
-              onClick={() => onTabChange(item.id)}
-              className={`transition-colors relative py-1 ${
-                activeTab === item.id ? 'text-white' : 'hover:text-primary-purple'
-              }`}
-            >
-              {item.label}
-              {activeTab === item.id && (
-                <motion.div 
-                  layoutId="activeTab"
-                  className="absolute -bottom-[17px] left-0 right-0 h-0.5 bg-primary-purple shadow-[0_0_10px_rgba(168,85,247,0.5)]"
-                />
-              )}
-            </button>
-          ))}
         </div>
       </div>
 

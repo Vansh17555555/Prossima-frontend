@@ -26,14 +26,20 @@ export default function Home() {
   const [searchTerm, setSearchTerm] = useState("");
   const [totalCount, setTotalCount] = useState(0);
   const [offset, setOffset] = useState(0);
-  const [activeTab, setActiveTab] = useState("dashboard");
+  const [statusFilter, setStatusFilter] = useState("");
+  const [workAreaFilter, setWorkAreaFilter] = useState("");
+  const [showFilters, setShowFilters] = useState(false);
   const LIMIT = 12;
 
-  const fetchTenders = async (query = "", currentOffset = 0, append = false) => {
+  const fetchTenders = async (query = "", currentOffset = 0, append = false, status = "", workArea = "") => {
     if (!append) setLoading(true);
     try {
       const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
-      const response = await axios.get(`${baseUrl}/api/tenders?limit=${LIMIT}&offset=${currentOffset}&q=${query}`);
+      let url = `${baseUrl}/api/tenders?limit=${LIMIT}&offset=${currentOffset}&q=${query}`;
+      if (status) url += `&status=${status}`;
+      if (workArea) url += `&work_area=${workArea}`;
+      
+      const response = await axios.get(url);
       
       if (response.data && response.data.tenders) {
         if (append) {
@@ -52,8 +58,8 @@ export default function Home() {
 
   useEffect(() => {
     setOffset(0);
-    fetchTenders(searchTerm, 0, false);
-  }, [searchTerm]);
+    fetchTenders(searchTerm, 0, false, statusFilter, workAreaFilter);
+  }, [searchTerm, statusFilter, workAreaFilter]);
 
   const handleSearch = (term: string) => {
     setSearchTerm(term);
@@ -62,80 +68,139 @@ export default function Home() {
   const handleLoadMore = () => {
     const nextOffset = offset + LIMIT;
     setOffset(nextOffset);
-    fetchTenders(searchTerm, nextOffset, true);
+    fetchTenders(searchTerm, nextOffset, true, statusFilter, workAreaFilter);
   };
 
   return (
     <main className="min-h-screen pb-20">
-      <Navbar onSearch={handleSearch} activeTab={activeTab} onTabChange={setActiveTab} />
+      <Navbar onSearch={handleSearch} />
 
       <div className="max-w-7xl mx-auto px-6 pt-12">
-        {activeTab === 'dashboard' || activeTab === 'tenders' ? (
-          <>
-            <header className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
-              <div>
-                <motion.div 
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary-purple/10 border border-primary-purple/20 text-primary-purple text-xs font-bold tracking-wider mb-4"
-                >
-                  <RefreshCcw className="w-3 h-3" />
-                  LIVE UPDATES ACTIVE
-                </motion.div>
-                <h1 className="text-4xl font-extrabold tracking-tight mb-2">
-                  {activeTab === 'dashboard' ? 'Tender Analytics' : 'Tender Directory'} <span className="text-primary-purple">&</span> Control
-                </h1>
-                <p className="text-muted-foreground text-lg max-w-2xl">
-                  {activeTab === 'dashboard' 
-                    ? 'Real-time monitoring and analytics for IREPS railway tenders.'
-                    : 'Search and browse through all available IREPS tenders.'}
-                </p>
-              </div>
+        <header className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
+          <div>
+            <motion.div 
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary-purple/10 border border-primary-purple/20 text-primary-purple text-xs font-bold tracking-wider mb-4"
+            >
+              <RefreshCcw className="w-3 h-3" />
+              LIVE UPDATES ACTIVE
+            </motion.div>
+            <h1 className="text-4xl font-extrabold tracking-tight mb-2">
+              Tender Analytics <span className="text-primary-purple">&</span> Control
+            </h1>
+            <p className="text-muted-foreground text-lg max-w-2xl">
+              Real-time monitoring and analytics for IREPS railway tenders.
+            </p>
+          </div>
 
-              <div className="flex items-center gap-3">
-                <div className="flex bg-white/5 border border-white/10 p-1 rounded-xl">
-                  <button 
-                    onClick={() => setViewMode("grid")}
-                    className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-primary-purple text-white shadow-lg' : 'text-muted-foreground hover:text-white'}`}
+          <div className="flex items-center gap-3">
+            <div className="flex bg-white/5 border border-white/10 p-1 rounded-xl">
+              <button 
+                onClick={() => setViewMode("grid")}
+                className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-primary-purple text-white shadow-lg' : 'text-muted-foreground hover:text-white'}`}
+              >
+                <LayoutGrid className="w-4 h-4" />
+              </button>
+              <button 
+                onClick={() => setViewMode("list")}
+                className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-primary-purple text-white shadow-lg' : 'text-muted-foreground hover:text-white'}`}
+              >
+                <ListIcon className="w-4 h-4" />
+              </button>
+            </div>
+            <button 
+              onClick={() => setShowFilters(!showFilters)}
+              className={`flex items-center gap-2 px-4 py-2 border rounded-xl transition-all font-medium text-sm ${
+                showFilters || statusFilter || workAreaFilter 
+                ? 'bg-primary-purple/10 border-primary-purple text-primary-purple' 
+                : 'bg-white/5 border-white/10 hover:border-white/20'
+              }`}
+            >
+              <Filter className="w-4 h-4" />
+              {statusFilter || workAreaFilter ? 'Filters (Active)' : 'Filters'}
+            </button>
+          </div>
+        </header>
+
+        <AnimatePresence>
+          {showFilters && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="overflow-hidden mb-8"
+            >
+              <div className="glass p-6 rounded-2xl grid grid-cols-1 md:grid-cols-3 gap-6 border-primary-purple/20">
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Status</label>
+                  <select 
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value)}
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-primary-purple/50 transition-all"
                   >
-                    <LayoutGrid className="w-4 h-4" />
-                  </button>
-                  <button 
-                    onClick={() => setViewMode("list")}
-                    className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-primary-purple text-white shadow-lg' : 'text-muted-foreground hover:text-white'}`}
+                    <option value="">All Statuses</option>
+                    <option value="Published">Published</option>
+                    <option value="Closing Soon">Closing Soon</option>
+                    <option value="Open">Open</option>
+                    <option value="Closed">Closed</option>
+                  </select>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Work Area</label>
+                  <select 
+                    value={workAreaFilter}
+                    onChange={(e) => setWorkAreaFilter(e.target.value)}
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-primary-purple/50 transition-all"
                   >
-                    <ListIcon className="w-4 h-4" />
+                    <option value="">All Areas</option>
+                    <option value="Goods & Service">Goods & Service</option>
+                    <option value="Works">Works</option>
+                    <option value="Procurement">Procurement</option>
+                    <option value="Engineering">Engineering</option>
+                  </select>
+                </div>
+
+                <div className="flex items-end">
+                  <button 
+                    onClick={() => {
+                      setStatusFilter("");
+                      setWorkAreaFilter("");
+                      setSearchTerm("");
+                    }}
+                    className="w-full px-4 py-2.5 rounded-xl border border-white/10 hover:bg-white/5 transition-all text-sm font-medium"
+                  >
+                    Reset All Filters
                   </button>
                 </div>
-                <button className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-xl hover:border-white/20 transition-all font-medium text-sm">
-                  <Filter className="w-4 h-4" />
-                  Filters
-                </button>
               </div>
-            </header>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-            <DashboardStats 
-              total={totalCount} 
-              active={Math.floor(totalCount * 0.4)} 
-              expiring={Math.floor(totalCount * 0.05)} 
-              growth="+12.5%" 
-            />
+        <DashboardStats 
+          total={totalCount} 
+          active={Math.floor(totalCount * 0.4)} 
+          expiring={Math.floor(totalCount * 0.05)} 
+          growth="+12.5%" 
+        />
 
-            <section>
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold flex items-center gap-2">
-                  {activeTab === 'dashboard' ? 'Latest Tenders' : 'All Tenders'}
-                  <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-white/5 text-muted-foreground border border-white/10">
-                    {searchTerm ? `Found ${totalCount}` : activeTab === 'dashboard' ? 'Recent' : `Total ${totalCount}`}
-                  </span>
-                </h2>
-                <button 
-                  onClick={() => fetchTenders(searchTerm, 0, false)}
-                  className="text-xs text-primary-purple hover:underline font-medium"
-                >
-                  Refresh Results
-                </button>
-              </div>
+        <section>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-bold flex items-center gap-2">
+              Latest Tenders
+              <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-white/5 text-muted-foreground border border-white/10">
+                Found {totalCount}
+              </span>
+            </h2>
+            <button 
+              onClick={() => fetchTenders(searchTerm, 0, false, statusFilter, workAreaFilter)}
+              className="text-xs text-primary-purple hover:underline font-medium"
+            >
+              Refresh Results
+            </button>
+          </div>
 
               <AnimatePresence mode="wait">
                 {loading ? (
@@ -167,44 +232,25 @@ export default function Home() {
                 )}
               </AnimatePresence>
 
-              {tenders.length < totalCount && (
-                <div className="mt-12 flex justify-center">
-                  <button 
-                    onClick={handleLoadMore}
-                    disabled={loading}
-                    className="px-8 py-3 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 hover:border-white/20 transition-all font-bold text-sm flex items-center gap-2 group disabled:opacity-50"
-                  >
-                    {loading ? (
-                      <RefreshCcw className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <>
-                        Load More Tenders
-                        <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                      </>
-                    )}
-                  </button>
-                </div>
-              )}
-            </section>
-          </>
-        ) : (
-          <div className="flex flex-col items-center justify-center py-32 text-center">
-            <div className="w-20 h-20 rounded-3xl bg-primary-purple/10 flex items-center justify-center mb-6 animate-pulse">
-              <RefreshCcw className="w-10 h-10 text-primary-purple" />
+          {tenders.length < totalCount && (
+            <div className="mt-12 flex justify-center">
+              <button 
+                onClick={handleLoadMore}
+                disabled={loading}
+                className="px-8 py-3 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 hover:border-white/20 transition-all font-bold text-sm flex items-center gap-2 group disabled:opacity-50"
+              >
+                {loading ? (
+                  <RefreshCcw className="w-4 h-4 animate-spin" />
+                ) : (
+                  <>
+                    Load More Tenders
+                    <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  </>
+                )}
+              </button>
             </div>
-            <h2 className="text-3xl font-bold mb-4">{activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} Module</h2>
-            <p className="text-muted-foreground text-lg max-w-md">
-              We are currently processing the heavy data required for this view. 
-              Real-time {activeTab} insights will be available shortly.
-            </p>
-            <button 
-              onClick={() => setActiveTab('dashboard')}
-              className="mt-8 px-6 py-2 bg-primary-purple text-white rounded-xl font-bold shadow-lg shadow-primary-purple/20 hover:bg-primary-purple/90 transition-all"
-            >
-              Back to Dashboard
-            </button>
-          </div>
-        )}
+          )}
+        </section>
       </div>
     </main>
   );
